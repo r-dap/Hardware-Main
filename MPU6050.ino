@@ -9,7 +9,7 @@
 MPU6050 mpu;
 bool mpuReady;
 
-int tiltArr[ARRAY_SIZE];
+unsigned char tiltArr[ARRAY_SIZE];
 int current = 0;
 
 

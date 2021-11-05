@@ -18,8 +18,6 @@ String gps_buffer = "";
 
 float lat = -1, lon = -1;
 
-String lastValidBuffer = "";
-
 char* GPGLL = "GPGLL";
 int GPGLLprogress = 0;
 String GPGLLbuffer = "";
@@ -42,11 +40,11 @@ void GPSMain()
     {
       delay(1);
       char c = GPSSerial.read();
-//      gps_buffer += c;
-//      if (gps_buffer.length() > 80)
-//      {
-//        gps_buffer = "";
-//      }
+      //      gps_buffer += c;
+      //      if (gps_buffer.length() > 80)
+      //      {
+      //        gps_buffer = "";
+      //      }
       EncodeGPS(c);
     }
 
@@ -77,7 +75,7 @@ void GPSMain()
           break;
         }
 #else
-        
+
 #endif
       }
       while (GPSSerial.available() > 0)
@@ -103,25 +101,6 @@ void GPSMain()
 
 void EncodeGPS(char x)
 {
-  if (GPGLLsensing)
-  {
-    GPGLLbuffer += x;
-  }
-  else if (GPGLL[GPGLLprogress] == x)
-  {
-    GPGLLprogress++;
-    if (GPGLLprogress == 5)
-    {
-      GPGLLsensing = true;
-    }
-  }
-  else
-  {
-    GPGLLbuffer = "";
-    GPGLLsensing = false;
-    GPGLLprogress = 0;
-  }
-
   if (x == '\r' || x == '\n')
   {
     if (GPGLLbuffer.length() != 0)
@@ -131,12 +110,32 @@ void EncodeGPS(char x)
         Serial.print(F("\r\nGPGLL: "));
         Serial.println(GPGLLbuffer);
         GPSLocationRawRCP(GPGLLbuffer);
-        lastValidBuffer = GPGLLbuffer;
       }
       else
       {
         Serial.println(F("\r\nGPS content not valid."));
       }
+      GPGLLbuffer = "";
+      GPGLLsensing = false;
+      GPGLLprogress = 0;
+    }
+  }
+  else
+  {
+    if (GPGLLsensing)
+    {
+      GPGLLbuffer += x;
+    }
+    else if (GPGLL[GPGLLprogress] == x)
+    {
+      GPGLLprogress++;
+      if (GPGLLprogress == 5)
+      {
+        GPGLLsensing = true;
+      }
+    }
+    else
+    {
       GPGLLbuffer = "";
       GPGLLsensing = false;
       GPGLLprogress = 0;

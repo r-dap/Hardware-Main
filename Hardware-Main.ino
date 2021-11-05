@@ -17,6 +17,9 @@ IntervalAction tiltAction(15000);
 IntervalAction collideAction(15000);
 IntervalAction gpsAction(20000);
 
+String fakePosition = ",3344.22222,N,12012.99999,E,151515.00,A,A*6C";
+String lastValidBuffer = fakePosition;
+
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(115200);
@@ -25,6 +28,7 @@ void setup() {
 
 #ifdef ENABLE_LTE
   LTESetup();
+  PostMessage(lastValidBuffer, "0", "123");
 #endif
 
 #ifdef ENABLE_GPS
@@ -71,7 +75,7 @@ void loop() {
       {
         Serial.print(F("Tilted!"));
         Serial.println(tiltAngle);
-        PostDisaster(2);
+        PostMessage(lastValidBuffer, F("1"), String((int)tiltAngle));
         //        BTPrint("Tilted: " + (String)tiltAngle, true, true);
       }
     }
@@ -100,7 +104,7 @@ void loop() {
     {
       Serial.print(F("Collided: "));
       Serial.println(movement);
-      PostDisaster(1);
+      PostMessage(lastValidBuffer, F("2"), String((int)movement));
       //      BTPrint("Collided: " + (String)movement, true, true);
     }
     EnableBuzzer();
@@ -114,19 +118,12 @@ void loop() {
   BuzzerMain();
 }
 
-void GPSLocationRCP(float latitude, float longitude)
-{
-  if(gpsAction.TryTrigger())
-  {
-    PostLL(latitude, longitude);
-  }
-}
-
 void GPSLocationRawRCP(String rawInfo)
 {
+  lastValidBuffer = rawInfo;
   if(gpsAction.TryTrigger())
   {
-    PostLLRaw(rawInfo);
+    PostMessage(rawInfo, "0", "123");
   }
 }
 
