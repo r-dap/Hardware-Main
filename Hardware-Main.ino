@@ -2,9 +2,9 @@
 #include "IntervalAction.cpp"
 #include <MemoryUsage.h>;
 
-#define ENABLE_GPS
+//#define ENABLE_GPS
 //#define ENABLE_BT
-#define ENABLE_LTE
+//#define ENABLE_LTE
 #define ENABLE_MPU6050
 #define ENABLE_BUZZER
 
@@ -12,7 +12,7 @@ using namespace std;
 
 bool* mpuReadyPtr;
 
-IntervalAction tiltAction(15000);
+IntervalAction tiltAction(1000);
 //IntervalAction temperatureAction(3000);
 IntervalAction collideAction(15000);
 IntervalAction gpsAction(20000);
@@ -63,8 +63,6 @@ void loop() {
 #ifdef ENABLE_MPU6050
   SetTiltData();
 
-  if (*mpuReadyPtr)
-  {
     float tiltAngle = GetTiltData();
     //        Serial.print("TileAngle: ");
     //        Serial.println(tiltAngle);
@@ -94,25 +92,25 @@ void loop() {
     //      }
     //      EnableBuzzer();
     //    }
-  }
+  
 
 
-  float movement = getHorizontalMovement();
-  if (movement > 2)
-  {
-    if (collideAction.TryTrigger())
-    {
-      Serial.print(F("Collided: "));
-      Serial.println(movement);
-      PostMessage(lastValidBuffer, F("2"), String((int)movement));
-      //      BTPrint("Collided: " + (String)movement, true, true);
-    }
-    EnableBuzzer();
-  }
-  else
-  {
-    DisableBuzzer();
-  }
+//  float movement = getHorizontalMovement();
+//  if (movement > 2)
+//  {
+//    if (collideAction.TryTrigger())
+//    {
+//      Serial.print(F("Collided: "));
+//      Serial.println(movement);
+//      PostMessage(lastValidBuffer, F("2"), String((int)movement));
+//      //      BTPrint("Collided: " + (String)movement, true, true);
+//    }
+//    EnableBuzzer();
+//  }
+//  else
+//  {
+//    DisableBuzzer();
+//  }
 #endif
 
   BuzzerMain();

@@ -4,7 +4,7 @@
 #include <math.h>
 
 
-#define ARRAY_SIZE 30
+#define ARRAY_SIZE 100
 
 MPU6050 mpu;
 bool mpuReady;

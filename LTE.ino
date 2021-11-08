@@ -158,6 +158,7 @@ void APISetup()
 
 void PostMessage(String rawInfo, String eventType, String value)
 {
+  #ifdef ENABLE_LTE
   APISetup();
   Serial.println(F("Posting message"));
   SendCommandAndWait(F("AT\r"), 500);
@@ -184,9 +185,8 @@ void PostMessage(String rawInfo, String eventType, String value)
   SendCommandAndWait(F("\"}"), 500);
   
   SendCommandAndWait(F("AT+HTTPACTION=1\r"), 500);
-  WaitAndPrint(60000);
-  SendCommandAndWait(F("AT+HTTPREAD=200\r"), 1000);
   Serial.println(F("Finished postiing message"));
+  #endif
 }
 
 void LTESetup()

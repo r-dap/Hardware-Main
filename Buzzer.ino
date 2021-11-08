@@ -1,8 +1,21 @@
 
 #define BUZZER_PIN 8
 
+// for enabling buzzer
 IntervalAction buzzerAction(100);
+
+// for setting buzzer pin HIGH and LOW
+IntervalAction buzzerIntervalAction(100);
+
+// SOS timeing sequence
+IntervalAction buzzerLong(400);
+IntervalAction buzzerShort(100);
+IntervalAction buzzerSleep(1000);
+int section = 0; // 0 = waiting, 1~3 = short, 4~6 = Long, 7~9 = short, 10~11 = sleep
+
 //int buzzerEnabler = 0;
+
+// The actual buzzer pin output state
 bool buzzerState = false;
 
 int buzzerTimer = 0;
@@ -22,39 +35,89 @@ void BuzzerMain()
 {
 #ifdef ENABLE_BUZZER
 
-//  if (buzzerAction.TryTrigger())
-//  {
-//    if (buzzerEnabler <= 0)
-//    {
-//      DisableBuzzer();
-//    }
-//    else
-//    {
-//      buzzerState = !buzzerState;
-//      digitalWrite(BUZZER_PIN, buzzerState);
-//    }
-//    buzzerEnabler = 0;
-//  }
-
-  if(millis() < buzzerTimer)
+  if (activating && (initTime - millis() > 15000))
   {
-    buzzerState = true;
-  }
-  else
-  {
-    buzzerState = false;
+    activating = false;
   }
 
-  if(buzzerState)
-  {
-    digitalWrite(BUZZER_PIN, HIGH);
-  }
-  else
-  {
-    digitalWrite(BUZZER_PIN, LOW);
-  }
-  
+//  SOSBuzzing();
+  NormalBuzzing();
+
+
 #endif
+}
+
+void SOSBuzzing()
+{
+  if(activating)
+  {
+    if((1 <= section && section <= 4) || (9 <= section && section <= 12))
+    {
+      if (buzzerShort.TryTrigger())
+      {
+        if (buzzerState)
+        {
+          buzzerState = false;
+          digitalWrite(BUZZER_PIN, LOW);
+        }
+        else
+        {
+          buzzerState = true;
+          digitalWrite(BUZZER_PIN, HIGH);
+          section++;
+        }
+        Serial.println(section);
+      }
+    }
+    if(5 <= section && section <= 8)
+    {
+      if (buzzerLong.TryTrigger())
+      {
+        if (buzzerState)
+        {
+          buzzerState = false;
+          digitalWrite(BUZZER_PIN, LOW);
+        }
+        else
+        {
+          buzzerState = true;
+          digitalWrite(BUZZER_PIN, HIGH);
+          section++;
+        }
+        Serial.println(section);
+      }
+    }
+    if(section == 13 && section == 14)
+    {
+      if (buzzerSleep.TryTrigger())
+      {
+        if(section == 14)
+        {
+          section = 1;
+        }
+      }
+    }
+  }
+}
+
+void NormalBuzzing()
+{
+  if (activating)
+  {
+    if (buzzerIntervalAction.TryTrigger())
+    {
+      if (buzzerState)
+      {
+        buzzerState = false;
+        digitalWrite(BUZZER_PIN, LOW);
+      }
+      else
+      {
+        buzzerState = true;
+        digitalWrite(BUZZER_PIN, HIGH);
+      }
+    }
+  }
 }
 
 
@@ -62,26 +125,19 @@ void EnableBuzzer()
 {
   if (activating == false)
   {
+    section = 1;
     activating = true;
-    initTime = millis();
-  }
-
-  if (activating && millis() - initTime > 3000)
-  {
-    if (buzzerAction.TryTrigger())
-    {
-      digitalWrite(BUZZER_PIN, HIGH);
-      delay(1);
-      digitalWrite(BUZZER_PIN, LOW);
-    }
-
+    initTime = millis() + 3000;
   }
 }
 
 void DisableBuzzer()
 {
-
-  activating = false;
-  initTime = millis();
-  digitalWrite(BUZZER_PIN, LOW);
+  if (activating == false)
+  {
+    section = 0;
+    activating = false;
+    initTime = millis();
+    digitalWrite(BUZZER_PIN, LOW);
+  }
 }
